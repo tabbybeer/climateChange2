@@ -6,17 +6,19 @@
 
 .bar { fill: rgb(8, 138, 245); }
 
-.svg.title {
-  visibility: hidden;
-  width: 120px;
-  background-color: black;
-  color: #fff;
-  text-align: center;
-  padding: 5px 0;
-  border-radius: 6px;
- 
-  /* Position the tooltip text - see examples below! */
-  position: absolute;
-  z-index: 1;
+body{
+  margin-left: 4%;
+  margin-right: 4%;
+  margin-bottom: 4%;
+  background-color: rgb(235, 238, 229);
 }
+
+
+  
+
+
+
+
+
+
 

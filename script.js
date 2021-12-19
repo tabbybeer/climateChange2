@@ -1,8 +1,14 @@
-
-//change color of website
+/* eslint-disable no-undef */
+"use strict";
+//change color of website (used as onclick within html)
+/**
+ * Function to change the background color of the webpage
+ * @param {string} color - The rgb value which the background of the page will be changed to
+ */
+// eslint-disable-next-line no-unused-vars
 function changeColor(color) {
     document.body.style.background = color;
-};
+}
 
 /**
  * Class structure for line graph
@@ -61,7 +67,17 @@ class Line {
             svg.append("path")
                 .data([data])
                 .attr("class", "line")
-                .attr("d", valueline);
+                .attr("d", valueline)
+                .on("mouseover", function () {
+                    d3.select(this).transition()
+                        .duration('50')
+                        .attr('opacity', '.65');
+                })
+                .on("mouseout", function () {
+                    d3.select(this).transition()
+                        .duration('50')
+                        .attr('opacity', '1');
+                });
 
             // add x axis
             svg.append("g")
@@ -76,7 +92,7 @@ class Line {
 
     }
 
-};
+}
 
 
 /**
@@ -94,8 +110,8 @@ function flagImage(dataFile) {
         case "usaCo2.csv":
             return "images/usa.png"
 
-    };
-};
+    }
+}
 
 
 /**
@@ -107,21 +123,28 @@ function lineGraph(dataFile) {
     graph.createLine();
     let img = flagImage(dataFile);
     document.getElementById("flag").src = img
-};
+}
 
 //initialize the line graph area with the uk graph
 lineGraph('ukCo2.csv');
 
 
-//class structure for bar chart
+/**
+ * Class structure for bar chart
+ * @param {string} dataFile - The name of the datafile which the bar chart will be made from
+ */
 class Bar {
     constructor(dataFile) {
         this.margin = { top: 20, right: 20, bottom: 50, left: 70 };
         this.width = 1000 - this.margin.left - this.margin.right;
         this.height = 500 - this.margin.top - this.margin.bottom;
         this.data = dataFile
-    };
+    }
 
+    /**
+    * Function to actually draw the bar chart. Includes d3 and svg elements
+    * uses class structure for dimensions and data file
+    */
     createBarChart() {
         // range of data
         var x = d3.scaleBand()
@@ -137,8 +160,6 @@ class Bar {
             .append("g")
             .attr("transform",
                 "translate(" + this.margin.left + "," + this.margin.top + ")");
-
-
 
         // get the data
         d3.csv(this.data).then(function (data) {
@@ -161,7 +182,7 @@ class Bar {
                 .attr("width", x.bandwidth())
                 .attr("y", function (d) { return y(d.y2021); })
                 .attr("height", function (d) { return 430 - y(d.y2021); })
-                .on("mouseover", function (d) {
+                .on("mouseover", function () {
                     d3.select(this).transition()
                         .duration('50')
                         .attr('opacity', '.65');
@@ -184,9 +205,10 @@ class Bar {
                 .call(d3.axisLeft(y));
 
         });
-    };
-};
+    }
+}
 
+//create new barchart object with the average temperature data and create the chart on the webpage
 let newBar = new Bar("avgTemp.csv");
 newBar.createBarChart();
 

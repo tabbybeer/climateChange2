@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: script.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: script.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* eslint-disable no-undef */
+"use strict";
+//change color of website (used as onclick within html)
+/**
+ * Function to change the background color of the webpage
+ * @param {string} color - The rgb value which the background of the page will be changed to
+ */
+// eslint-disable-next-line no-unused-vars
+function changeColor(color) {
+    document.body.style.background = color;
+}
+
+/**
+ * Class structure for line graph
+ * @param {string} dataFile - The name of the datafile which the line graph will be made from
+ */
+class Line {
+    constructor(dataFile) {
+        this.margin = { top: 20, right: 20, bottom: 50, left: 70 };
+        this.width = 1000 - this.margin.left - this.margin.right;
+        this.height = 500 - this.margin.top - this.margin.bottom;
+        this.dataFile = dataFile;
+    }
+    /**
+     * function to actually draw the line with d3 and svg elements
+     * uses the class structure for the data file and graph dimensions
+     */
+    createLine() {
+        //to remove what is already in the section
+        document.getElementById("line").innerHTML = "";
+
+        // format for the date
+        var parseTime = d3.timeParse("%d-%b-%y");
+
+        // set the ranges
+        var x = d3.scaleTime().range([0, this.width]);
+        var y = d3.scaleLinear().range([this.height, 0]);
+
+        // define the line
+        var valueline = d3.line()
+            .x(function (d) { return x(d.date); })
+            .y(function (d) { return y(d.close); });
+
+
+        // create the svg element and append g to line section
+        var svg = d3.select("#line").append("svg")
+            .attr("width", this.width + this.margin.left + this.margin.right)
+            .attr("height", this.height + this.margin.top + this.margin.bottom)
+            .append("g")
+            .attr("transform",
+                "translate(" + this.margin.left + "," + this.margin.top + ")");
+
+        // get data
+        d3.csv(this.dataFile).then(function (data) {
+
+            // format 
+            data.forEach(function (d) {
+                d.date = parseTime(d.date);
+                d.close = +d.close;
+            });
+
+            // range of data
+            x.domain(d3.extent(data, function (d) { return d.date; }));
+            y.domain([0, d3.max(data, function (d) { return d.close; })]);
+
+            // add the path
+            svg.append("path")
+                .data([data])
+                .attr("class", "line")
+                .attr("d", valueline)
+                .on("mouseover", function () {
+                    d3.select(this).transition()
+                        .duration('50')
+                        .attr('opacity', '.65');
+                })
+                .on("mouseout", function () {
+                    d3.select(this).transition()
+                        .duration('50')
+                        .attr('opacity', '1');
+                });
+
+            // add x axis
+            svg.append("g")
+                .attr("transform", "translate(0," + 430 + ")")
+                .call(d3.axisBottom(x));
+
+            // add y axis
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+        });
+
+    }
+
+}
+
+
+/**
+ * Function to set the image for the line chart based on the data file being used
+ * @param {string} dataFile - The name of the datafile which corresponds to the country flag needed
+ */
+function flagImage(dataFile) {
+    switch (dataFile) {
+        case "ukCo2.csv":
+            return "images/uk.png"
+        case "russiaCo2.csv":
+            return "images/russia.png"
+        case "chinaCo2.csv":
+            return "images/china.png"
+        case "usaCo2.csv":
+            return "images/usa.png"
+
+    }
+}
+
+
+/**
+ * Function to create a new object of the line class and call the createLine function on this new object
+ * @param {string} dataFile - The name of the datafile which the line graph will be made from
+ */
+function lineGraph(dataFile) {
+    let graph = new Line(dataFile);
+    graph.createLine();
+    let img = flagImage(dataFile);
+    document.getElementById("flag").src = img
+}
+
+//initialize the line graph area with the uk graph
+lineGraph('ukCo2.csv');
+
+
+/**
+ * Class structure for bar chart
+ * @param {string} dataFile - The name of the datafile which the bar chart will be made from
+ */
+class Bar {
+    constructor(dataFile) {
+        this.margin = { top: 20, right: 20, bottom: 50, left: 70 };
+        this.width = 1000 - this.margin.left - this.margin.right;
+        this.height = 500 - this.margin.top - this.margin.bottom;
+        this.data = dataFile
+    }
+
+    /**
+    * Function to actually draw the bar chart. Includes d3 and svg elements
+    * uses class structure for dimensions and data file
+    */
+    createBarChart() {
+        // range of data
+        var x = d3.scaleBand()
+            .range([0, this.width])
+            .padding(0.1);
+        var y = d3.scaleLinear()
+            .range([this.height, 0]);
+
+        // define svg and append to bar chart section
+        var svg2 = d3.select("#barChart").append("svg")
+            .attr("width", this.width + this.margin.left + this.margin.right)
+            .attr("height", this.height + this.margin.top + this.margin.bottom)
+            .append("g")
+            .attr("transform",
+                "translate(" + this.margin.left + "," + this.margin.top + ")");
+
+        // get the data
+        d3.csv(this.data).then(function (data) {
+
+            // format 
+            data.forEach(function (d) {
+                d.y2021 = +d.y2021;
+            });
+
+            // range and domain of data
+            x.domain(data.map(function (d) { return d.month; }));
+            y.domain([0, d3.max(data, function (d) { return d.y2021; })]);
+
+            // append the rectangles for the bar chart
+            svg2.selectAll(".bar")
+                .data(data)
+                .enter().append("rect")
+                .attr("class", "bar")
+                .attr("x", function (d) { return x(d.month); })
+                .attr("width", x.bandwidth())
+                .attr("y", function (d) { return y(d.y2021); })
+                .attr("height", function (d) { return 430 - y(d.y2021); })
+                .on("mouseover", function () {
+                    d3.select(this).transition()
+                        .duration('50')
+                        .attr('opacity', '.65');
+                })
+                .on("mouseout", function () {
+                    d3.select(this).transition()
+                        .duration('50')
+                        .attr('opacity', '1');
+                })
+                .append("title")
+                .text(function (d) { return d.y2021; });
+
+            // add the x Axis
+            svg2.append("g")
+                .attr("transform", "translate(0," + 430 + ")")
+                .call(d3.axisBottom(x));
+
+            // add the y Axis
+            svg2.append("g")
+                .call(d3.axisLeft(y));
+
+        });
+    }
+}
+
+//create new barchart object with the average temperature data and create the chart on the webpage
+let newBar = new Bar("avgTemp.csv");
+newBar.createBarChart();
+
+
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Bar.html">Bar</a></li><li><a href="Line.html">Line</a></li></ul><h3>Global</h3><ul><li><a href="global.html#changeColor">changeColor</a></li><li><a href="global.html#flagImage">flagImage</a></li><li><a href="global.html#lineGraph">lineGraph</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Dec 19 2021 17:46:23 GMT+0300 (Arabian Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

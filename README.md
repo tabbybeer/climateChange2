@@ -1,9 +1,9 @@
 Climate change (summative project)
 
 Instructions:
-Fork the repository
-Clone the repository
-Run the index.html file on a local server to view the webpage
+Fork the repository,
+Clone the repository,
+Run the index.html file on a local server to view the webpage.
 
 Description:
 A webpage created on climate change which includes: a bar chart showing the average temperatures in the uk 
